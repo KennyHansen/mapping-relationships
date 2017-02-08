@@ -1,0 +1,27 @@
+{
+  "name": "da-planets",
+  "version": "1.0.0",
+  "description": "Da-Planets\r ==========",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "debug": "node --debug index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BoiseCodeWorks/mapping-relationships.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BoiseCodeWorks/mapping-relationships/issues"
+  },
+  "homepage": "https://github.com/BoiseCodeWorks/mapping-relationships#readme",
+  "dependencies": {
+    "body-parser": "^1.16.0",
+    "express": "^4.14.1",
+    "mongoose": "^4.8.1",
+    "uuid": "^3.0.1"
+  }
+}
