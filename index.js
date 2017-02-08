@@ -191,6 +191,93 @@ server.get('/moons/:id', function (req, res) {
     return res.send({ error: "That's no moon." })
 })
 
+//PUT
+server.put('/galaxies/:id', function (req, res) {
+    let galaxyId = req.params.id
+    let galaxyName = req.body.name
+    let galaxy = searchFor('galaxies', galaxyId)
+
+    if(galaxy) {
+        galaxy.name = galaxyName
+        return res.send({message:"Successfully changed galaxy to " + galaxyName})
+    }
+})
+server.put('/stars/:id', function (req, res) {
+    let starsId = req.params.id
+    let starsName = req.body.name
+    let stars = searchFor('stars', starsId)
+
+    if(stars) {
+        stars.name = starsName
+        return res.send({message:"Successfully changed stars to " + starsName})
+    }
+})
+server.put('/planets/:id', function (req, res) {
+    let planetId = req.params.id
+    let planetName = req.body.name
+    let planet = searchFor('planets', planetId)
+
+    if(planet) {
+        planet.name = planetName
+        return res.send({message:"Successfully changed planet to " + planetName})
+    }
+})
+server.put('/moons/:id', function (req, res) {
+    let moonId = req.params.id
+    let moonName = req.body.name
+    let moon = searchFor('moons', moonId)
+
+    if(moon) {
+        moon.name = moonName
+        return res.send({message:"Successfully changed moon to " + moonName})
+    }
+})
+// DELETE
+server.delete('/galaxies/:id', function (req, res) {
+    let galaxyId = req.params.id
+    let galaxyName = req.body.name
+    let galaxy = searchFor('galaxies', galaxyId)
+
+    if(galaxy) {
+        //Deletes
+        deleteFromUniverse('galaxies', galaxy)
+        return res.send({message:"Successfully deleted galaxy"})
+    }
+})
+server.delete('/stars/:id', function (req, res) {
+    let starsId = req.params.id
+    let starsName = req.body.name
+    let stars = searchFor('stars', starsId)
+
+    if(stars) {
+        //Deletes
+        deleteFromUniverse('stars', star)
+        return res.send({message:"Successfully changed stars to " + starsName})
+    }
+})
+server.delete('/planets/:id', function (req, res) {
+    let planetId = req.params.id
+    let planetName = req.body.name
+    let planet = searchFor('planets', planetId)
+
+    if(planet) {
+        //Deletes
+        deleteFromUniverse('planets', planet)
+        return res.send({message:"Successfully changed planet to " + planetName})
+    }
+})
+server.delete('/moons/:id', function (req, res) {
+    let moonId = req.params.id
+    let moonName = req.body.name
+    let moon = searchFor('moons', moonId)
+
+    if(moon) {
+        //Deletes
+        deleteFromUniverse('moons', moon)
+        return res.send({message:"Successfully changed moon to " + moonName})
+    }
+})
+
 
 function searchFor(query, id) {
     let searchedData = db[query]
@@ -206,7 +293,31 @@ function searchFor(query, id) {
     return foundElement
 }
 
+function deleteFromUniverse(query, element) {
+    let elementId = element.id
+    let searchedData = db[query]
 
+    let planet = searchedData.find(planet => { return planet.id == element.planetId })
+    let star = searchedData.find(star => { return star.id == element.starId })
+    let galaxy = searchedData.find(galaxy => { return galaxy.id == element.galaxyId })
+
+    if(planet) {
+        let index = planet.findIndex(x => x.id = elementId);
+        planet.splice(index, 1)
+    }
+    if(star) {
+        let index = star.findIndex(x => x.id = elementId);
+        star.splice(index, 1)
+    }
+    if(galaxy) {
+        let index = galaxy.findIndex(x => x.id = elementId);
+        galaxy.splice(index, 1)
+    }
+
+    let index = searchedData.findIndex(x => x.id = elementId);
+    searchedData.splice(index, 1)
+
+}
 
 
 
