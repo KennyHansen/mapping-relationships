@@ -1,8 +1,39 @@
 let express = require('express')
 let bodyParser = require('body-parser')
 let uuid = require('uuid')
-let mongo = require('mongoose')
+let mongoose = require('mongoose')
+
+
+let galaxyRoutes = require('./server-assets/routes/galaxy-routes')
+let starRoutes = require('./server-assets/routes/star-routes')
+// let planetRoutes = require('./server-assets/routes/planet-routes')
+// let moonRoutes = require('./server-assets/routes/moon-routes')
+// let speciesRoutes = require('./server-assets/routes/species-routes')
+
 const PORT = process.env.PORT || 8080
+
+// DONT PUSH A REAL CONNECTION STRING TO GITHUB
+const connectionString = 'mongodb://he-man:heyy@ds056789.mlab.com:56789/space-the-final-frontier'
+
+let connection = mongoose.connection
+
+//copypaste this stuff because it do
+mongoose.connect(connectionString, {
+    server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
+    replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }
+});
+
+connection.on('error', (err) => {
+    console.log("No connection found", err)
+})
+
+connection.once('open', () => {
+    console.log("Space. The Final Frontier.")
+    server.listen(PORT, function () {
+        console.log("The server is lit on", 'http://localhost:' + PORT)
+    })
+})
+
 
 let server = express()
 // This is totally fake
@@ -14,90 +45,17 @@ let db = {
     species: []
 }
 
+
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({ extended: true }))
+server.use(galaxyRoutes)
+server.use(starRoutes)
 
 
 server.get('/', function () {
     console.log("Hey! Listen!")
 })
 
-// GALAXIES
-server.get('/galaxies', function (req, res) {
-    console.log("Hey! Listen!")
-    return res.send({ data: db.galaxies })
-})
-
-
-server.post('/galaxies', (req, res) => {
-    let galaxy = req.body
-
-    if (!galaxy.name || !galaxy.description) {
-        return res.send('Nope')
-    }
-
-    galaxy.id = uuid.v1()
-
-    galaxy.stars = []
-    galaxy.planets = []
-    galaxy.moons = []
-
-    db.galaxies.push(galaxy)
-    return res.send({ message: "Successfully created a new galaxy", data: galaxy })
-})
-
-
-server.get('/galaxies/:id', function (req, res) {
-    let galaxyId = req.params.id
-    let galaxy = searchFor('galaxies', galaxyId)
-    console.log("galaxy:", galaxy)
-    if (galaxy) {
-        return res.send({ message: "Found galaxy", data: galaxy })
-    }
-    return res.send({ error: "Galaxy does not exist" })
-})
-
-// STARS
-server.get('/stars', function (req, res) {
-    console.log("Hey! Listen!")
-    return res.send({ data: db.stars })
-})
-
-server.post('/stars', function (req, res) {
-    let star = req.body
-
-    if (!star.galaxyId) {
-        return res.send({ error: "YOU MUST CONSTRUCT ADDITIONAL GALAXIES" })
-    }
-
-    let galaxy = db.galaxies.find(galaxy => { return galaxy.id == star.galaxyId })
-
-    if (galaxy) {
-        star.id = uuid.v1()
-
-        galaxy.stars.push(star)
-        star.planets = []
-        star.moons = []
-
-        db.stars.push(star)
-
-        return res.send({
-            message: "Successfuly added star to the " + galaxy.name + " galaxy",
-            data: star
-        })
-    }
-    return res.send({ error: 'The galaxy does not exist' })
-})
-
-server.get('/stars/:id', function (req, res) {
-    let starId = req.params.id
-    let star = searchFor('stars', starId)
-    console.log("star:", star)
-    if (star) {
-        return res.send({ message: "Found star", data: star })
-    }
-    return res.send({ error: "Star does not exist" })
-})
 
 // PLANETS
 server.get('/planets', function (req, res) {
@@ -197,9 +155,9 @@ server.put('/galaxies/:id', function (req, res) {
     let galaxyName = req.body.name
     let galaxy = searchFor('galaxies', galaxyId)
 
-    if(galaxy) {
+    if (galaxy) {
         galaxy.name = galaxyName
-        return res.send({message:"Successfully changed galaxy to " + galaxyName})
+        return res.send({ message: "Successfully changed galaxy to " + galaxyName })
     }
 })
 server.put('/stars/:id', function (req, res) {
@@ -207,9 +165,9 @@ server.put('/stars/:id', function (req, res) {
     let starsName = req.body.name
     let stars = searchFor('stars', starsId)
 
-    if(stars) {
+    if (stars) {
         stars.name = starsName
-        return res.send({message:"Successfully changed stars to " + starsName})
+        return res.send({ message: "Successfully changed stars to " + starsName })
     }
 })
 server.put('/planets/:id', function (req, res) {
@@ -217,9 +175,9 @@ server.put('/planets/:id', function (req, res) {
     let planetName = req.body.name
     let planet = searchFor('planets', planetId)
 
-    if(planet) {
+    if (planet) {
         planet.name = planetName
-        return res.send({message:"Successfully changed planet to " + planetName})
+        return res.send({ message: "Successfully changed planet to " + planetName })
     }
 })
 server.put('/moons/:id', function (req, res) {
@@ -227,9 +185,9 @@ server.put('/moons/:id', function (req, res) {
     let moonName = req.body.name
     let moon = searchFor('moons', moonId)
 
-    if(moon) {
+    if (moon) {
         moon.name = moonName
-        return res.send({message:"Successfully changed moon to " + moonName})
+        return res.send({ message: "Successfully changed moon to " + moonName })
     }
 })
 // DELETE
@@ -238,10 +196,10 @@ server.delete('/galaxies/:id', function (req, res) {
     let galaxyName = req.body.name
     let galaxy = searchFor('galaxies', galaxyId)
 
-    if(galaxy) {
+    if (galaxy) {
         //Deletes
         deleteFromUniverse('galaxies', galaxy)
-        return res.send({message:"Successfully deleted galaxy"})
+        return res.send({ message: "Successfully deleted galaxy" })
     }
 })
 server.delete('/stars/:id', function (req, res) {
@@ -249,10 +207,10 @@ server.delete('/stars/:id', function (req, res) {
     let starsName = req.body.name
     let stars = searchFor('stars', starsId)
 
-    if(stars) {
+    if (stars) {
         //Deletes
         deleteFromUniverse('stars', star)
-        return res.send({message:"Successfully changed stars to " + starsName})
+        return res.send({ message: "Successfully changed stars to " + starsName })
     }
 })
 server.delete('/planets/:id', function (req, res) {
@@ -260,10 +218,10 @@ server.delete('/planets/:id', function (req, res) {
     let planetName = req.body.name
     let planet = searchFor('planets', planetId)
 
-    if(planet) {
+    if (planet) {
         //Deletes
         deleteFromUniverse('planets', planet)
-        return res.send({message:"Successfully changed planet to " + planetName})
+        return res.send({ message: "Successfully changed planet to " + planetName })
     }
 })
 server.delete('/moons/:id', function (req, res) {
@@ -271,10 +229,10 @@ server.delete('/moons/:id', function (req, res) {
     let moonName = req.body.name
     let moon = searchFor('moons', moonId)
 
-    if(moon) {
+    if (moon) {
         //Deletes
         deleteFromUniverse('moons', moon)
-        return res.send({message:"Successfully changed moon to " + moonName})
+        return res.send({ message: "Successfully changed moon to " + moonName })
     }
 })
 
@@ -301,15 +259,15 @@ function deleteFromUniverse(query, element) {
     let star = searchedData.find(star => { return star.id == element.starId })
     let galaxy = searchedData.find(galaxy => { return galaxy.id == element.galaxyId })
 
-    if(planet) {
+    if (planet) {
         let index = planet.findIndex(x => x.id = elementId);
         planet.splice(index, 1)
     }
-    if(star) {
+    if (star) {
         let index = star.findIndex(x => x.id = elementId);
         star.splice(index, 1)
     }
-    if(galaxy) {
+    if (galaxy) {
         let index = galaxy.findIndex(x => x.id = elementId);
         galaxy.splice(index, 1)
     }
@@ -318,19 +276,3 @@ function deleteFromUniverse(query, element) {
     searchedData.splice(index, 1)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-server.listen(PORT, function () {
-    console.log("The server is lit on", 'http://localhost:' + PORT)
-})
